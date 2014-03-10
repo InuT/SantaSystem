@@ -13,7 +13,7 @@ namespace DataPlatform
 
         private SqlCommand dbCommand;
 
-        private Dictionary<string, SqlDataAdapter> DataAdapters;
+        private Dictionary<string, SqlDataAdapter> dataAdapters;
 
         public SQLServer()
         {
@@ -23,7 +23,7 @@ namespace DataPlatform
 
             data = new DataSet();
 
-            DataAdapters = new Dictionary<string, SqlDataAdapter>();
+            dataAdapters = new Dictionary<string, SqlDataAdapter>();
         }
 
         public override DbConnection DbConnection
@@ -57,16 +57,29 @@ namespace DataPlatform
             dbConnection.Close();
         }
 
+        public override DataAdapter GetDataAdapter(string tableName)
+        {
+            return (SqlDataAdapter)dataAdapters[tableName];
+        }
+
         public override void FillData(string query, string tableName)
         {
-            if (DataAdapters.ContainsKey(tableName)) 
+            if (dataAdapters.ContainsKey(tableName)) 
                 throw new ArgumentException(tableName + ": already exists in DataAdapters :)");
 
             SqlDataAdapter dataAdapter = new SqlDataAdapter(query, dbConnection);
 
             dataAdapter.Fill(data, tableName);
 
-            DataAdapters.Add(tableName, dataAdapter);
+            dataAdapters.Add(tableName, dataAdapter);
+        }
+
+        public override void ReflectChangesInDataSet()
+        {
+            foreach(string tableName in dataAdapters.Keys)
+            {
+                ((SqlDataAdapter)dataAdapters[tableName]).Update(Data, tableName);
+            }
         }
     }
 }

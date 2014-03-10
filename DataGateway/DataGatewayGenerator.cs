@@ -13,7 +13,7 @@ namespace DataGateway
             SampleTableGateway,
         }
 
-        public static DataGateway GenerateDataPlatform(DataGatewayType dataGatewayType)
+        public static DataGateway GenerateDataGateway(DataGatewayType dataGatewayType)
         {
             switch (dataGatewayType)
             {

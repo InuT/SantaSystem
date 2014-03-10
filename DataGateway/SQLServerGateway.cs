@@ -42,6 +42,13 @@ namespace DataGateway
             this.dataPlatform = dataPlatform;
         }
 
+        public override DataPlatform.DataPlatform Dataplatform
+        {
+            get { return dataPlatform; }
+
+            set { dataPlatform = (SQLServer)value; }
+        }
+
         public override void OpenGateway()
         {
             dataPlatform = DataPlatformGenerator.GenerateDataPlatform(DataPlatformGenerator.DataPlatformType.SQLServer);
@@ -61,6 +68,22 @@ namespace DataGateway
             string commandString = string.Format("SELECT * FROM {0} where {1}", TableName, whereClause);
 
             dataPlatform.FillData(commandString, TableName);
+        }
+
+        public virtual void setDataAdapter()
+        {
+        }
+
+        public virtual void Insert()
+        {
+        }
+
+        public virtual void Update()
+        {
+        }
+
+        public virtual void Delete()
+        {
         }
     }
 }

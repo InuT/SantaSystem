@@ -33,17 +33,28 @@ namespace DataPlatform
 
         public override void ConnectionOpen()
         {
-            
+            // Under construction :D
         }
 
         public override void ConnectionClose()
         {
-            
+            // Under construction :D
         }
 
         public override void FillData(string query, string tableName)
         {
-            
+            // Under construction :D
+        }
+
+        public override void ReflectChangesInDataSet()
+        {
+            // Under construction :D
+        }
+
+        public override DataAdapter GetDataAdapter(string tableName)
+        {
+            // Under construction :D
+            return (DataAdapter)new Object();
         }
     }
 }

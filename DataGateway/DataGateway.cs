@@ -26,6 +26,13 @@ namespace DataGateway
             this.dataPlatform = dataPlatform;
         }
 
+        public abstract DataPlatform.DataPlatform Dataplatform
+        {
+            get;
+
+            set;
+        }
+
         public abstract void OpenGateway();
 
         public abstract void LoadAll();

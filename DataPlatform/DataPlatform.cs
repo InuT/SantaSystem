@@ -36,6 +36,10 @@ namespace DataPlatform
 
         public abstract void ConnectionClose();
 
+        public abstract DataAdapter GetDataAdapter(string tableName);
+
         public abstract void FillData(string query, string tableName);
+
+        public abstract void ReflectChangesInDataSet();
     }
 }
