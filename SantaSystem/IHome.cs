@@ -10,7 +10,7 @@ namespace SantaSystem
     public interface IHome
     {
         [OperationContract]
-        void HostSanta(Santa santa, string assemblyName);
+        void HostSanta(Santa santa);
 
         [OperationContract]
         void DeployPresentAssembly(string assemblyName, byte[] assemblyBits);

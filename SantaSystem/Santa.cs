@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
 using System.Reflection;
 using System.ServiceModel;
@@ -13,22 +12,30 @@ namespace SantaSystem
     [Serializable]
     public class Santa
     {
-        private int santaID;
+        private string santaID;
 
         private bool usingCPU;
-        
-        private string presentName;
+
+        private bool isSerialProcessing;
+
+        private static int counter = 0;
+
+        private string[] presentName;
+
+        private int numberOfPresents;
 
         private string presentDirPath;
 
-        public Santa(int agebtID)
+        public Santa(string santaID, bool isSerialProcessing)
         {
-            this.santaID = agebtID;
+            this.santaID = santaID;
+
+            this.isSerialProcessing = isSerialProcessing;
 
             this.usingCPU = false;
         }
 
-        public int SantaID
+        public string SantaID
         {
             get{return this.santaID;}
             
@@ -42,6 +49,20 @@ namespace SantaSystem
             set{this.usingCPU = value;}
         }
 
+        public bool IsSerialProcessing
+        {
+            get { return this.isSerialProcessing; }
+
+            set { this.isSerialProcessing = value; }
+        }
+
+        public int NumberOfPresents
+        {
+            get { return this.presentName.Length; }
+
+            set { this.numberOfPresents = value; }
+        }
+
         public void Work()
         {
             Console.WriteLine(string.Format("[Prototype] Santa{0}: Present For You :D", SantaID));
@@ -51,7 +72,7 @@ namespace SantaSystem
 
         public void ExecutePresentAssembly()
         {
-            string presentAssemblyPath = Path.Combine(presentDirPath, presentName);
+            string presentAssemblyPath = Path.Combine(presentDirPath, presentName[counter++]);
 
             Assembly presentAssembly = Assembly.LoadFrom(presentAssemblyPath);
 
@@ -65,9 +86,18 @@ namespace SantaSystem
             method.Invoke(instance, null);
         }
 
-        public void Migration(string homeURL, string endPoint, string assemblyName)
+        public void Migration(string homeURL, string endPoint, string[] assemblyName)
         {
-            presentName = assemblyName;
+            int index = 0;
+
+            presentName = new string[assemblyName.Length];
+
+            foreach (string an in assemblyName)
+            {
+                presentName[index] = an;
+
+                index++;
+            }
 
             EndpointAddress endpointAddress = new EndpointAddress(string.Format("net.{0}{1}", homeURL, endPoint));
 
@@ -79,21 +109,28 @@ namespace SantaSystem
 
             presentDirPath = home.GetPresentDirPath();
 
-            home.HostSanta(this, presentName);
+            home.HostSanta(this);
         }
 
-        private void SendPresentAssembly(IHome home, string assemblyName)
+        private void SendPresentAssembly(IHome home, string[] assemblyName)
         {
-            Assembly presentAssembly = Assembly.LoadFrom(assemblyName);
-            
-            byte[] assemblyBytes = PutPresentAssemblyIntoSack(presentAssembly);
+            Assembly presentAssembly;
 
-            home.DeployPresentAssembly(assemblyName, assemblyBytes);
+            byte[] assemblyBytes;
+
+            foreach (string an in assemblyName)
+            {
+                presentAssembly = Assembly.LoadFrom(an);
+
+                assemblyBytes = PutPresentAssemblyIntoSack(presentAssembly);
+
+                home.DeployPresentAssembly(an, assemblyBytes);
+            }
         }
 
         private byte[] PutPresentAssemblyIntoSack(Assembly assembly)
         {
-            byte[] assemblyBytes = null;
+            byte[] assemblyBytes;
 
             using (FileStream fileStream = File.OpenRead(assembly.Location))
             {

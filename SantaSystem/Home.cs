@@ -31,7 +31,7 @@ namespace SantaSystem
             serviceHost.Open();
         }
         
-        public void HostSanta(Santa santa, string assemblyName)
+        public void HostSanta(Santa santa)
         {
             try
             {
@@ -39,13 +39,13 @@ namespace SantaSystem
                 
                 lock (workSpaces)
                 {
-                    if (workSpaces.ContainsKey(assemblyName))
+                    if (workSpaces.ContainsKey(santa.SantaID))
                     {
-                        workSpace = workSpaces[assemblyName];
+                        workSpace = workSpaces[santa.SantaID];
                     }
                     else
                     {
-                        workSpace = CreateWorkSpace(assemblyName);
+                        workSpace = CreateWorkSpace(santa.SantaID);
                     }
                 }
 

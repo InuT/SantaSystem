@@ -10,18 +10,21 @@ namespace DepatureSpace
     {
         static void Main(string[] args)
         {
-            // Sample: 3 santas presents 'Query0001.dll' :)
-            Santa santa0 = new Santa(0000);
+            // santa0: serial processing :D
+            Santa santa0 = new Santa("0000", true);
+            
+            // santa0: parallel processing :D
+            Santa santa1 = new Santa("0001", false);
 
-            Santa santa1 = new Santa(0001);
+            string[] query = new string[2];
 
-            Santa santa2 = new Santa(0002);
+            query[0] = "Query0001.dll";
+            
+            query[1] = "Query0002.dll";
 
-            santa0.Migration("tcp://localhost:10000", "/HostSanta", "Query0001.dll");
+            santa0.Migration("tcp://localhost:10000", "/HostSanta", query);
 
-            santa1.Migration("tcp://localhost:10000", "/HostSanta", "Query0002.dll");
-
-            santa2.Migration("tcp://localhost:10000", "/HostSanta", "Query0001.dll");
+            santa1.Migration("tcp://localhost:10000", "/HostSanta", query);
         }
     }
 }
