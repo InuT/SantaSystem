@@ -16,6 +16,8 @@ namespace SantaSystem
 
         private bool usingCPU;
 
+        private int maxDop;
+
         private bool isSerialProcessing;
 
         private static int counter = 0;
@@ -29,6 +31,8 @@ namespace SantaSystem
         public Santa(string santaID, bool isSerialProcessing)
         {
             this.santaID = santaID;
+
+            this.maxDop = 0;
 
             this.isSerialProcessing = isSerialProcessing;
 
@@ -47,6 +51,13 @@ namespace SantaSystem
             get{return this.usingCPU;}
             
             set{this.usingCPU = value;}
+        }
+
+        public int MaxDop
+        {
+            get{return this.maxDop;}
+
+            set { this.maxDop = value; }
         }
 
         public bool IsSerialProcessing
