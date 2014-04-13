@@ -13,14 +13,18 @@ namespace DepatureSpace
             // santa0: serial processing :D
             Santa santa0 = new Santa("0000", true);
             
-            // santa0: parallel processing :D
+            // santa0: hybrid processing :D
             Santa santa1 = new Santa("0001", false);
 
-            string[] query = new string[2];
+            santa1.MaxDop = 2;
 
-            query[0] = "Query0001.dll";
-            
-            query[1] = "Query0002.dll";
+            string[][] query = new string[3][];
+
+            query[0] = new string[] { "Query0002.dll", "Query0003.dll", "Query0004.dll" };
+
+            query[1] = new string[] { "Query0001.dll" };
+
+            query[2] = new string[] { "Query0003.dll", "Query0003.dll", "Query0003.dll", "Query0003.dll", "Query0003.dll" };
 
             santa0.Migration("tcp://localhost:10000", "/HostSanta", query);
 

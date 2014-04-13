@@ -26,7 +26,7 @@ namespace CacheService
 
         public MemoryCache MemoryCache
         { 
-            get{return memoryCache;} 
+            get { return memoryCache; } 
         }
     }
 }

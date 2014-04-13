@@ -26,6 +26,8 @@ namespace SantaSystem
 
         private int numberOfPresents;
 
+        private Dictionary<int, int> hierarchyInfo;
+
         private string presentDirPath;
 
         public Santa(string santaID, bool isSerialProcessing)
@@ -41,21 +43,21 @@ namespace SantaSystem
 
         public string SantaID
         {
-            get{return this.santaID;}
+            get { return this.santaID; }
             
-            set{this.santaID = value;}
+            set { this.santaID = value; }
         }
 
         public bool UsingCPU
         {
-            get{return this.usingCPU;}
+            get { return this.usingCPU; }
             
-            set{this.usingCPU = value;}
+            set { this.usingCPU = value; }
         }
 
         public int MaxDop
         {
-            get{return this.maxDop;}
+            get { return this.maxDop; }
 
             set { this.maxDop = value; }
         }
@@ -72,6 +74,13 @@ namespace SantaSystem
             get { return this.presentName.Length; }
 
             set { this.numberOfPresents = value; }
+        }
+
+        public Dictionary<int, int> HierarchyInfo
+        {
+            get { return this.hierarchyInfo; }
+
+            set { this.hierarchyInfo = value; }
         }
 
         public void Work()
@@ -97,17 +106,33 @@ namespace SantaSystem
             method.Invoke(instance, null);
         }
 
-        public void Migration(string homeURL, string endPoint, string[] assemblyName)
+        public void Migration(string homeURL, string endPoint, string[][] assemblyName)
         {
-            int index = 0;
+            int presentIndex = 0;
 
-            presentName = new string[assemblyName.Length];
+            int hierarchyIndex = 0;
 
-            foreach (string an in assemblyName)
+            foreach (string[] an in assemblyName)
             {
-                presentName[index] = an;
+                numberOfPresents = numberOfPresents + an.Length;
+            }
 
-                index++;
+            presentName = new string[numberOfPresents];
+
+            hierarchyInfo = new Dictionary<int,int>();
+
+            foreach (string[] an in assemblyName)
+            {
+                hierarchyInfo[hierarchyIndex] = an.Length;
+
+                hierarchyIndex++;
+
+                foreach (string an2 in an)
+                {
+                    presentName[presentIndex] = an2;
+
+                    presentIndex++;
+                }
             }
 
             EndpointAddress endpointAddress = new EndpointAddress(string.Format("net.{0}{1}", homeURL, endPoint));

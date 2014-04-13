@@ -11,7 +11,7 @@ namespace DataGateway
     {
         public override string TableName
         {
-            get{return "Sample";}
+            get { return "Sample"; }
         }
     }
 }

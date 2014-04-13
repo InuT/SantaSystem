@@ -13,17 +13,17 @@ namespace SantaSystem
         {
             if (santa.IsSerialProcessing == true)
             {
-                ProcessSerially(santa);
+                SerialProcess(santa);
             }
             else
             {
-                ProcessParallelly(santa);
+                HybridProcess(santa);
             }
         }
 
         // Santa avoid creating wasteful threads in the thread pool, 
         // so don't use Start() and Wait() :D
-        private void ProcessSerially(Santa santa)
+        private void SerialProcess(Santa santa)
         {
             Task task = null;
 
@@ -43,30 +43,37 @@ namespace SantaSystem
             }
         }
 
-        private void ProcessParallelly(Santa santa)
+        private void HybridProcess(Santa santa)
         {
-            if (santa.MaxDop == 0)
-            {
-                for (int i = 0; i < santa.NumberOfPresents; i++)
-                {
-                    Task.Run(() => Present(santa));
-                }
-            }
-            else
-            {
-                ParallelOptions parallelOptions = new ParallelOptions();
+            ParallelOptions parallelOptions = new ParallelOptions();
 
-                parallelOptions.MaxDegreeOfParallelism = santa.MaxDop;
+            parallelOptions.MaxDegreeOfParallelism = santa.MaxDop;
 
+            Dictionary<int, int> hierarchy = santa.HierarchyInfo;
+
+            for (int h = 0; h < hierarchy.Count; h++)
+            {
                 try
                 {
-                    Parallel.For(0, santa.NumberOfPresents, parallelOptions, i => Present(santa));
+                    Parallel.For(0, hierarchy[h], parallelOptions, i => Present(santa));
                 }
                 catch (AggregateException ae)
                 {
                     Console.WriteLine(ae.ToString());
 
                     throw;
+                }
+            }
+        }
+
+        private void ParallelProcess(Santa santa)
+        {
+            Dictionary<int, int> temp = santa.HierarchyInfo;
+            for (int h = 0; h < temp.Count; h++)
+            {
+                for (int i = 0; i < temp[h]; i++)
+                {
+                    Task.Run(() => Present(santa));
                 }
             }
         }

@@ -13,12 +13,12 @@ namespace DataGateway
 
         public override DataSet Data
         {
-            get{return dataPlatform.Data;}
+            get { return dataPlatform.Data; }
         }
 
         public virtual string TableName 
         {
-            get{return tableName;}
+            get { return tableName; }
         }
 
         public SQLServerGateway()
