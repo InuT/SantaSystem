@@ -1,183 +1,134 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.IO;
 using System.Reflection;
 using System.ServiceModel;
+using System.Runtime.Serialization;
+using System.Xml;
 
 namespace SantaSystem
 {
     [Serializable]
     public class Santa
     {
-        private string santaID;
-
-        private bool usingCPU;
-
-        private int maxDop;
-
-        private bool isSerialProcessing;
-
         private static int counter = 0;
-
-        private string[] presentName;
-
-        private int numberOfPresents;
-
-        private Dictionary<int, int> hierarchyInfo;
-
-        private string presentDirPath;
 
         public Santa(string santaID, bool isSerialProcessing)
         {
-            this.santaID = santaID;
-
-            this.maxDop = 0;
-
-            this.isSerialProcessing = isSerialProcessing;
-
-            this.usingCPU = false;
+            this.SantaID = santaID;
+            this.IsSerialProcessing = isSerialProcessing;
+            this.MaxDop = 0;
+            this.NumberOfPresents = 0;
         }
 
         public string SantaID
         {
-            get { return this.santaID; }
-            
-            set { this.santaID = value; }
-        }
-
-        public bool UsingCPU
-        {
-            get { return this.usingCPU; }
-            
-            set { this.usingCPU = value; }
-        }
-
-        public int MaxDop
-        {
-            get { return this.maxDop; }
-
-            set { this.maxDop = value; }
+            get;
+            set;
         }
 
         public bool IsSerialProcessing
         {
-            get { return this.isSerialProcessing; }
+            get;
+            set;
+        }
 
-            set { this.isSerialProcessing = value; }
+        public int MaxDop
+        {
+            get;
+            set;
+        }
+
+        public string PresentDirPath
+        {
+            get;
+            set;
+        }
+
+        public string[] PresentNames
+        {
+            get;
+            set;
         }
 
         public int NumberOfPresents
         {
-            get { return this.presentName.Length; }
-
-            set { this.numberOfPresents = value; }
+            get;
+            set;
         }
 
         public Dictionary<int, int> HierarchyInfo
         {
-            get { return this.hierarchyInfo; }
-
-            set { this.hierarchyInfo = value; }
+            get;
+            set;
         }
 
         public void Work()
         {
             Console.WriteLine(string.Format("[Prototype] Santa{0}: Present For You :D", SantaID));
-
             ExecutePresentAssembly();
         }
 
         public void ExecutePresentAssembly()
         {
-            string presentAssemblyPath = Path.Combine(presentDirPath, presentName[counter++]);
-
-            Assembly presentAssembly = Assembly.LoadFrom(presentAssemblyPath);
-
-            Type[] assemblyType = presentAssembly.GetTypes();
+            var presentAssembly = Assembly.LoadFrom(Path.Combine(PresentDirPath, PresentNames[counter++]));
+            Type[] presentAssemblyType = presentAssembly.GetTypes();
 
             // Only Work() metohd :D 
-            MethodInfo method = assemblyType[0].GetMethod("Work", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var instance = Activator.CreateInstance(assemblyType[0]);
-
+            MethodInfo method = presentAssemblyType[0].GetMethod("Work", BindingFlags.NonPublic | BindingFlags.Instance);
+            var instance = Activator.CreateInstance(presentAssemblyType[0]);
             method.Invoke(instance, null);
         }
 
-        public void Migration(string homeURL, string endPoint, string[][] assemblyName)
+        public void Migration(string homeURL, string endPoint, string[][] presentAssemblyNames)
         {
             int presentIndex = 0;
-
             int hierarchyIndex = 0;
 
-            foreach (string[] an in assemblyName)
+            foreach (string[] ans in presentAssemblyNames)
+                NumberOfPresents = NumberOfPresents + ans.Length;
+
+            PresentNames = new string[NumberOfPresents];
+            HierarchyInfo = new Dictionary<int,int>();
+
+            foreach (string[] ans in presentAssemblyNames)
             {
-                numberOfPresents = numberOfPresents + an.Length;
+                HierarchyInfo[hierarchyIndex++] = ans.Length;
+
+                foreach (string an in ans)
+                    PresentNames[presentIndex++] = an;
             }
 
-            presentName = new string[numberOfPresents];
-
-            hierarchyInfo = new Dictionary<int,int>();
-
-            foreach (string[] an in assemblyName)
-            {
-                hierarchyInfo[hierarchyIndex] = an.Length;
-
-                hierarchyIndex++;
-
-                foreach (string an2 in an)
-                {
-                    presentName[presentIndex] = an2;
-
-                    presentIndex++;
-                }
-            }
-
-            EndpointAddress endpointAddress = new EndpointAddress(string.Format("net.{0}{1}", homeURL, endPoint));
-
-            ChannelFactory<IHome> factory = new ChannelFactory<IHome>(new NetTcpBinding());
-
+            var factory = new ChannelFactory<IHome>(new NetTcpBinding());
+            var endpointAddress = new EndpointAddress(string.Format("net.{0}{1}", homeURL, endPoint));
+            
             IHome home = factory.CreateChannel(endpointAddress);
-
-            SendPresentAssembly(home, presentName);
-
-            presentDirPath = home.GetPresentDirPath();
-
+            SendPresentAssembly(home, PresentNames);
+            PresentDirPath = home.GetChristmasStockingPath();
             home.HostSanta(this);
         }
 
-        private void SendPresentAssembly(IHome home, string[] assemblyName)
+        private void SendPresentAssembly(IHome home, string[] presentAssemblyNames)
         {
-            Assembly presentAssembly;
-
-            byte[] assemblyBytes;
-
-            foreach (string an in assemblyName)
+            foreach (string an in presentAssemblyNames)
             {
-                presentAssembly = Assembly.LoadFrom(an);
-
-                assemblyBytes = PutPresentAssemblyIntoSack(presentAssembly);
-
-                home.DeployPresentAssembly(an, assemblyBytes);
+                home.DeployPresentAssembly(an, LoadPresentAssemblyBytes(Assembly.LoadFrom(an)));
             }
         }
 
-        private byte[] PutPresentAssemblyIntoSack(Assembly assembly)
+        private byte[] LoadPresentAssemblyBytes(Assembly presentAssembly)
         {
-            byte[] assemblyBytes;
+            byte[] bytesOfPresentAssembly;
 
-            using (FileStream fileStream = File.OpenRead(assembly.Location))
+            using (FileStream fs = File.OpenRead(presentAssembly.Location))
             {
-                assemblyBytes = new byte[fileStream.Length];
-
-                fileStream.Read(assemblyBytes, 0, assemblyBytes.Length);
-
-                fileStream.Close();
+                bytesOfPresentAssembly = new byte[fs.Length];
+                fs.Read(bytesOfPresentAssembly, 0, bytesOfPresentAssembly.Length);
+                fs.Close();
             }
 
-            return assemblyBytes;
+            return bytesOfPresentAssembly;
         }
     }
 }

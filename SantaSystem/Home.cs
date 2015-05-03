@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -12,22 +11,18 @@ namespace SantaSystem
 {    
     public class Home : MarshalByRefObject, IHome
     {
-        private static Dictionary<string, AppDomain> workSpaces = new Dictionary<string, AppDomain>();
-
+        private static Dictionary<string, AppDomain> workSpaces;
+        private static string christmasStockingPath;
         private static string homeURL;
 
-        private static string presentDirPath;
-
-        public static void Initialize(int port, string endPoint, string dirPath)
+        public static void Initialize(int port, string endPoint, string deploymentDirPath)
         {
+            workSpaces = new Dictionary<string, AppDomain>();
+            christmasStockingPath = deploymentDirPath;
             homeURL = string.Format("net.tcp://{0}:{1}", Environment.MachineName, port);
 
-            presentDirPath = dirPath;
-
-            ServiceHost serviceHost = new ServiceHost(typeof(Home), new Uri(homeURL));
-
+            var serviceHost = new ServiceHost(typeof(Home), new Uri(homeURL));
             serviceHost.AddServiceEndpoint(typeof(IHome), new NetTcpBinding(), endPoint);
-            
             serviceHost.Open();
         }
         
@@ -40,13 +35,9 @@ namespace SantaSystem
                 lock (workSpaces)
                 {
                     if (workSpaces.ContainsKey(santa.SantaID))
-                    {
                         workSpace = workSpaces[santa.SantaID];
-                    }
                     else
-                    {
                         workSpace = CreateWorkSpace(santa.SantaID);
-                    }
                 }
 
                 ProxySanta proxySanta = (ProxySanta)workSpace.
@@ -57,43 +48,37 @@ namespace SantaSystem
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                
-                throw;
+                // TODO: error handling :D
+                throw (ex);
             }
         }
 
-        private AppDomain CreateWorkSpace(string assemblyName)
+        private AppDomain CreateWorkSpace(string presentAssemblyName)
         {
-            AppDomain workSpace = AppDomain.CreateDomain(assemblyName);
-
-            workSpaces.Add(assemblyName, workSpace);
-
+            var workSpace = AppDomain.CreateDomain(presentAssemblyName);
+            workSpaces.Add(presentAssemblyName, workSpace);
             return workSpace;
         }
 
-        public void DeployPresentAssembly(string assemblyName, byte[] assemblyBytes)
+        public void DeployPresentAssembly(string presentAssemblyName, byte[] presentAssemblyBytes)
         {
-            if (!Directory.Exists(presentDirPath))
+            if (!Directory.Exists(christmasStockingPath))
+                Directory.CreateDirectory(christmasStockingPath);
+
+            string deploymentPath = Path.Combine(christmasStockingPath, presentAssemblyName);
+            if (!File.Exists(deploymentPath))
             {
-                Directory.CreateDirectory(presentDirPath);
-            }
-
-            string filePath = Path.Combine(presentDirPath, assemblyName);
-
-            if (!File.Exists(filePath))
-            {
-                FileStream fileStream = File.OpenWrite(filePath);
-
-                fileStream.Write(assemblyBytes, 0, assemblyBytes.Length);
-
-                fileStream.Close();
+                using (FileStream fs = File.OpenWrite(deploymentPath))
+                {
+                    fs.Write(presentAssemblyBytes, 0, presentAssemblyBytes.Length);
+                    fs.Close();
+                }
             }
         }
 
-        public string GetPresentDirPath()
+        public string GetChristmasStockingPath()
         {
-            return presentDirPath;
+            return christmasStockingPath;
         }
     }
 }

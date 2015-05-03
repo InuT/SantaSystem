@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,13 +10,9 @@ namespace SantaSystem
         public void PresentFromSanta(Santa santa)
         {
             if (santa.IsSerialProcessing == true)
-            {
                 SerialProcess(santa);
-            }
             else
-            {
                 HybridProcess(santa);
-            }
         }
 
         // Santa avoid creating wasteful threads in the thread pool, 
@@ -30,14 +24,10 @@ namespace SantaSystem
             for (int i = 0; i < santa.NumberOfPresents; i++)
             {
                 if (i == 0)
-                {
                     task = Task.Run(() => Present(santa));
-                }
 
                 if (i == santa.NumberOfPresents - 1)
-                {
                     break;
-                }
 
                 task.ContinueWith(tempTask => Present(santa));
             }
@@ -45,12 +35,10 @@ namespace SantaSystem
 
         private void HybridProcess(Santa santa)
         {
-            ParallelOptions parallelOptions = new ParallelOptions();
-
-            parallelOptions.MaxDegreeOfParallelism = santa.MaxDop;
-
             Dictionary<int, int> hierarchy = santa.HierarchyInfo;
-
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.MaxDegreeOfParallelism = santa.MaxDop;
+            
             for (int h = 0; h < hierarchy.Count; h++)
             {
                 try
@@ -60,7 +48,6 @@ namespace SantaSystem
                 catch (AggregateException ae)
                 {
                     Console.WriteLine(ae.ToString());
-
                     throw;
                 }
             }
@@ -70,18 +57,13 @@ namespace SantaSystem
         {
             Dictionary<int, int> temp = santa.HierarchyInfo;
             for (int h = 0; h < temp.Count; h++)
-            {
                 for (int i = 0; i < temp[h]; i++)
-                {
                     Task.Run(() => Present(santa));
-                }
-            }
         }
 
         private void Present(object stateInfo)
         {
             Santa santa = (Santa)stateInfo;
-
             santa.Work();
         }
     }
