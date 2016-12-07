@@ -1,4 +1,5 @@
 # SantaSystem
 Mobile Object Framework primer
 
-![https://github.com/InuT/SantaSystem](/image/SanataSystem.png)
+![Alt Text](https://github.com/InuT/SanataSystem/image/SantaSystem.png)
+
