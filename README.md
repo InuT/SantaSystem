@@ -1,4 +1,4 @@
 # SantaSystem
 Mobile Object Framework primer
 
-![SanataSystem](image/SanataSystem.png)
+![SantaSystem](image/SantaSystem.png)
