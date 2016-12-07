@@ -1,5 +1,5 @@
-# SantaSystem
+tree/master/image# SantaSystem
 Mobile Object Framework primer
 
-![Alt Text](https://github.com/InuT/SantaSystem/image/SantaSystem.png)
+![Alt Text](https://github.com/InuT/tree/master/SantaSystem/image/SantaSystem.png)
 
